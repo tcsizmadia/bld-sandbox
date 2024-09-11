@@ -11,7 +11,6 @@ The intention behind this service is solely to be a subject for demonstrating [B
 - [Installation](#installation)
 - [Usage](#usage)
 - [API Endpoints](#api-endpoints)
-- [Contributing](#contributing)
 - [License](#license)
 
 ## Introduction
@@ -77,6 +76,10 @@ Example:
 ```sh
 curl -X GET http://localhost:8080/dogs/breeds
 ```
+
+## License
+
+This project is licensed under the terms of [The MIT License](https://opensource.org/license/mit). For reference, please read the [LICENSE](LICENSE) file in this repository.
 
 - **GET /dogs/names**: Retrieve a static sample set of dog names.
 
