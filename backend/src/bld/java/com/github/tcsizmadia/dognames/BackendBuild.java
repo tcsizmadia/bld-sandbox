@@ -6,6 +6,9 @@ import rife.bld.dependencies.Scope;
 import rife.bld.dependencies.VersionNumber;
 import rife.bld.extension.BootJarOperation;
 
+import com.github.tcsizmadia.dognames.breedgenerator.extension.BreedGeneratorHelp;
+import com.github.tcsizmadia.dognames.breedgenerator.extension.BreedGeneratorOperation;
+
 import java.nio.file.Path;
 import java.util.List;
 import java.util.logging.Logger;
@@ -50,8 +53,13 @@ public class BackendBuild extends WebProject {
     }
 
     @BuildCommand(summary = "Generate dog breeds", value = "generate-breeds", help = BreedGeneratorHelp.class)
-    public void generateBreeds() {
-        new BreedGenerator(Path.of("src/main/resources/dog-breeds.csv")).generate();
+    public void generateBreeds() throws Exception {
+        new BreedGeneratorOperation()
+                .fromProject(this)
+                .model("llama3.1")
+                .ollamaHost("localhost")
+                .ollamaPort(11434)
+                .execute();
     }
 
     public static void main(String[] args) {

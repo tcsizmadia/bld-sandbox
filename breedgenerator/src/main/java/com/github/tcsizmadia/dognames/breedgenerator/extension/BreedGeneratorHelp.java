@@ -1,4 +1,4 @@
-package com.github.tcsizmadia.dognames;
+package com.github.tcsizmadia.dognames.breedgenerator.extension;
 
 import rife.bld.CommandHelp;
 

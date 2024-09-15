@@ -1,4 +1,4 @@
-package com.github.tcsizmadia.dognames;
+package com.github.tcsizmadia.dognames.breedgenerator.extension;
 
 import com.fasterxml.jackson.jr.ob.JSON;
 
@@ -11,12 +11,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 public class BreedGenerator {
 
+    public static final String DEFAULT_OLLAMA_API_URL = "http://localhost:11434/api/generate";
     private static final Logger logger = Logger.getLogger(BreedGenerator.class.getName());
-
     private static final String PROMPT = """
             Create a CSV list of Dog breeds.
             Include exactly 10 entries.
@@ -24,20 +25,25 @@ public class BreedGenerator {
             The header should contain these fields: id, name, description.
             Respond only with the CSV and nothing else.
             """;
-
-    private static final String MODEL = "llama3.1";
-    public static final String OLLAMA_API_URL = "http://localhost:11434/api/generate";
-
+    private static final String DEFAULT_MODEL = "llama3.1";
     private final Path destination;
+    private final String model;
+    private final String apiURL;
+
+    public BreedGenerator(Path destination, String model, String apiURL) {
+        this.destination = destination;
+        this.model = model;
+        this.apiURL = apiURL;
+        logger.info("BreedGenerator initialized");
+    }
 
     public BreedGenerator(Path destination) {
-        this.destination = destination;
-        logger.info("BreedGenerator initialized");
+        this(destination, DEFAULT_MODEL, DEFAULT_OLLAMA_API_URL);
     }
 
     private String createJsonRequestPayload() throws IOException {
         var requestMap = new HashMap<String, Object>(3);
-        requestMap.put("model", MODEL);
+        requestMap.put("model", this.model);
         requestMap.put("prompt", PROMPT);
         requestMap.put("stream", false);
 
@@ -55,7 +61,7 @@ public class BreedGenerator {
         try {
             var client = HttpClient.newHttpClient();
             var request = HttpRequest.newBuilder()
-                    .uri(URI.create(OLLAMA_API_URL))
+                    .uri(URI.create(this.apiURL))
                     .POST(HttpRequest.BodyPublishers.ofString(this.createJsonRequestPayload()))
                     .build();
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -67,15 +73,18 @@ public class BreedGenerator {
         }
     }
 
-    public void generate() {
+    public boolean generate() {
         logger.info("Generating breeds using Ollama");
-
+        var result = new AtomicBoolean(false);
         this.fetchBreeds().ifPresent(csv -> {
             try {
                 Files.writeString(destination, csv.replace("\\n", System.lineSeparator()));
+                result.set(true);
             } catch (IOException e) {
                 logger.severe("Error writing breeds to file: " + e.getMessage());
             }
         });
-   }
+
+        return result.get();
+    }
 }

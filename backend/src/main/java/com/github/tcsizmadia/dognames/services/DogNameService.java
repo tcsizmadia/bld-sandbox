@@ -1,7 +1,6 @@
 package com.github.tcsizmadia.dognames.services;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Service to get dog names.
